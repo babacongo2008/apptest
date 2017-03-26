@@ -1,0 +1,89 @@
+var datastore = require('./datastore');
+var shortId = require('shortid');
+var MongoClient = require('mongodb').MongoClient;
+var ObjectId = require('mongodb').ObjectID;
+var assert = require('assert');
+var config = require('../../config');
+
+var mongoDb;
+
+var url = config.mongodbUri;
+
+MongoClient.connect(url, function(err, db) {
+  assert.equal(null, err);
+  config.logStars("Connected correctly to server.");
+  mongoDb = db;
+});
+
+// Get list of customers
+exports.list = function(req, res) {
+  
+  if (mongoDb){
+      var collection = mongoDb.collection('customers');
+      collection.find().toArray(function(err, items) {
+          res.send(items);
+      });
+    }
+    else
+    {
+        config.logStars('No database object!');
+        res.status(404).send({});
+    }
+} ;
+// Creates a new customer in datastore.
+exports.create = function(req, res) {
+	console.log(req.body);
+	var customer = req.body;
+    console.log('Adding contact: ' + JSON.stringify(customer));
+    if (mongoDb){
+      var collection = mongoDb.collection('customers');
+      collection.insert(contact, {w:1}, function(err, result) {
+            if (err) {
+                res.send({'error':'An error has occurred'});
+            } else {
+                console.log('Success: ' + JSON.stringify(result[0]));
+                res.send(result[0]);
+            }
+        });
+    }
+  else
+	{
+		console.log('No database object!');
+	}
+  
+};
+
+exports.update = function(req, res) {
+    
+	var id = req.params.id;
+    var customer = req.body;
+    console.log('Updating customer: ' + id);
+    console.log(JSON.stringify(customer));
+    var collection = mongoDb.collection('customers');
+    collection.update({'_id':new BSON.ObjectID(id)}, contact, {safe:true}, function(err, result) {
+	          if (err) {
+	              console.log('Error updating contact: ' + err);
+	              res.send({'error':'An error has occurred'});
+	          } else {
+	              console.log('' + result + ' document(s) updated');
+	              res.send(contact);
+	          }
+	});
+	
+};
+// delete an existing customer in datastore.
+exports.delete = function(req, res) {
+
+	var id = req.params.id;
+	  console.log('Deleting customer: ' + id);
+	  var collection = mongoDb.collection('customers');
+	  collection.remove({'_id':new BSON.ObjectID(id)}, {safe:true},     function(err, result) {
+	      if (err) {
+	          res.send({'error':'An error has occurred - ' + err});
+	      } else {
+	          console.log('' + result + ' document(s) deleted');
+	          res.send(req.body);
+	      }
+		});
+	
+};
