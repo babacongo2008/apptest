@@ -4,8 +4,9 @@ var Customer = require('../models/booking');
 var config = require('../config');
 
 //Get the default connection
-mongoose.connect(config.mongodbUri);
-var mongoDb = mongoose.connection;
+//mongoose.connect(config.mongodbUri);
+//var mongoDb = mongoose.connection;
+var mongoDb = mongoose.createConnection(config.mongodbUri);
 
 //Bind connection to error event (to get notification of connection errors)
 mongoDb.on('error', console.error.bind(console, 'MongoDB connection error:'));
